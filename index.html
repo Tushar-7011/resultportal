@@ -1,0 +1,174 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result Portal</title>
+    <style>
+        body { font-family: Arial; text-align: center; margin-top: 80px; }
+        input, select { padding: 8px; margin: 8px; width: 200px; }
+        button { padding: 8px 15px; background: blue; color: white; border: none; cursor: pointer; }
+        .box { border: 1px solid #ccc; display: inline-block; padding: 20px; }
+
+        table { margin-top: 15px; border-collapse: collapse; width: 100%; }
+        table, th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background: blue; color: white; }
+
+        .captcha-box {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            background: #f2f2f2;
+            display: inline-block;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+
+    <input type="text" id="roll" placeholder="Roll Number"><br>
+
+    <select id="sem">
+        <option value="">Select Semester</option>
+        <option>I</option>
+        <option>II</option>
+        <option>III</option>
+        <option>IV</option>
+        <option>V</option>
+        <option>VI</option>
+        <option>VII</option>
+        <option>VIII</option>
+    </select><br>
+
+    <div id="captchaQ" class="captcha-box"></div><br>
+    <input type="text" id="captchaA" placeholder="Enter Captcha"><br>
+
+    <button onclick="check()">Submit</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+let answer;
+
+// 🔐 Generate alphanumeric captcha
+function generateCaptcha() {
+    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let captcha = "";
+
+    for (let i = 0; i < 6; i++) {
+        captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    answer = captcha;
+
+    document.getElementById("captchaQ").innerHTML = captcha;
+}
+
+generateCaptcha();
+
+function randMarks() {
+    return Math.floor(Math.random() * 76);
+}
+
+function check() {
+    let roll = parseInt(document.getElementById("roll").value);
+    let sem = document.getElementById("sem").value;
+    let cap = document.getElementById("captchaA").value;
+
+    if (!roll || sem == "") {
+        document.getElementById("result").innerHTML = "Enter all details!";
+        return;
+    }
+
+    if (cap !== answer) {
+        document.getElementById("result").innerHTML = "Wrong Captcha!";
+        generateCaptcha();
+        return;
+    }
+
+    let subjects = ["Maths-I", "Physics", "Programming"];
+    let passMark = 30;
+    let marks = [0, 0, 0];
+    let status = ["", "", ""];
+
+    // 🎯 ROLL NUMBER LOGIC
+
+    // 25019004054 - 25019004062 → Maths Back
+    if (roll >= 25019004054 && roll <= 25019004062) {
+        marks = [randMarks() % 30, randMarks(), randMarks()];
+    }
+
+    // 25019004063 - 25019004099 → Random subject back
+    else if (roll >= 25019004063 && roll <= 25019004099) {
+        marks = [randMarks(), randMarks(), randMarks()];
+        let backIndex = Math.floor(Math.random() * 3);
+        marks[backIndex] = randMarks() % 30;
+    }
+
+    // 25019004100 - 25019004103 → Maths back, others pass
+    else if (roll >= 25019004100 && roll <= 25019004103) {
+        marks = [
+            randMarks() % 30,
+            30 + Math.floor(Math.random() * 46),
+            30 + Math.floor(Math.random() * 46)
+        ];
+    }
+
+    // 25019004104 → All pass
+    else if (roll == 25019004104) {
+        marks = [
+            30 + Math.floor(Math.random() * 46),
+            30 + Math.floor(Math.random() * 46),
+            30 + Math.floor(Math.random() * 46)
+        ];
+    }
+
+    // 25019004105 - 25019004117 → Random subject back
+    else if (roll >= 25019004105 && roll <= 25019004117) {
+        marks = [
+            30 + Math.floor(Math.random() * 46),
+            30 + Math.floor(Math.random() * 46),
+            30 + Math.floor(Math.random() * 46)
+        ];
+        let backIndex = Math.floor(Math.random() * 3);
+        marks[backIndex] = randMarks() % 30;
+    }
+
+    // Default → fully random
+    else {
+        marks = [randMarks(), randMarks(), randMarks()];
+    }
+
+    // STATUS
+    for (let i = 0; i < 3; i++) {
+        status[i] = (marks[i] >= passMark) ? "Pass" : "Back";
+    }
+
+    // TOTAL + AVERAGE
+    let total = marks[0] + marks[1] + marks[2];
+    let average = (total / 3).toFixed(2);
+
+    // DISPLAY RESULT
+    let html = "<b>Semester:</b> " + sem + "<br><br>";
+    html += "<table><tr><th>Subject</th><th>Marks</th><th>Pass Marks</th><th>Status</th></tr>";
+
+    for (let i = 0; i < 3; i++) {
+        html += "<tr><td>" + subjects[i] + "</td><td>" + marks[i] + "/75</td><td>" + passMark + "/75</td><td>" + status[i] + "</td></tr>";
+    }
+
+    html += "</table><br>";
+    html += "<b>Total:</b> " + total + "/225<br>";
+    html += "<b>Average:</b> " + average;
+
+    document.getElementById("result").innerHTML = html;
+
+    generateCaptcha();
+}
+</script>
+
+</body>
+</html>
+```
